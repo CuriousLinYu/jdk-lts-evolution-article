@@ -138,7 +138,7 @@ footer {
     <h2>目录</h2>
     <ul>
 <ul class="toc-sub">
-<li><a href="#一-引子-为什么-JDK-8-滞留了十年">一、引子：为什么 JDK 8 滞留了十年</a></li>
+<li><a href="#一-引子-四代-LTS-的演进主线">一、引子：四代 LTS 的演进主线</a></li>
 <li><a href="#二-版本全景-定位-节奏与许可证">二、版本全景：定位、节奏与许可证</a></li>
 <ul class="toc-sub">
 <li><a href="#2-1-四个-LTS-的定位">2.1 四个 LTS 的定位</a></li>
@@ -225,13 +225,12 @@ footer {
 <blockquote>
 <p>标签：Java进阶 · JDK版本演进 · 性能调优 · 生产迁移</p>
 </blockquote>
-<h2 id="一-引子-为什么-JDK-8-滞留了十年">一、引子：为什么 JDK 8 滞留了十年</h2>
-<p>2014 年 3 月发布的 JDK 8，到今天依然是大量生产系统的基座。一个发布时就被称为"Java 史上最大变革"的版本，为什么反而成了拦路虎？</p>
-<p>三个原因叠加：</p>
+<h2 id="一-引子-四代-LTS-的演进主线">一、引子：四代 LTS 的演进主线</h2>
+<p>2014 年 3 月发布的 JDK 8 是 Java 平台历史上变革最大的版本之一，也是大量生产系统沿用至今的基座。从 JDK 8 到 JDK 25，Java 平台经历了发布策略、许可证、语言特性三个层面的结构性变化：</p>
 <ol>
-<li><strong>JDK 9 的跳票与 9-16 的"无 LTS 空窗"</strong>：JDK 9 原计划 2016 年发布，因模块化争议一路推迟到 2017 年。9 到 16 整整八个版本没有一个 LTS，生产团队没有"安全升级点"，干脆不动。</li>
-<li><strong>2019 年 4 月的 Oracle 收费新政</strong>：JDK 8u211 之后 Oracle JDK 商用需要订阅付费。消息传开后多数团队的解读是"Java 要收费了"，升级反而被按下暂停键——实际上 Adoptium、Corretto、Zulu 等免费发行版从未断供，但恐慌的惯性留了下来。</li>
-<li><strong>javax → jakarta 的迁移恐惧</strong>：从 JDK 8 到 17 的升级路上横着 Spring Boot 3.0 的命名空间迁移，对存量系统意味着大量文件改动，成了"再等等"的最后一根稻草。</li>
+<li><strong>发布节奏切换</strong>：JDK 9（2017）起改为 6 个月一个版本的 train model，每年 3 月与 9 月发版；LTS 从最初每 3 年一个（8 → 11 → 17）调整为每 2 年一个（17 → 21 → 25）。JDK 9 因模块化争议从计划的 2016 年推迟到 2017 年，9 到 16 之间没有 LTS 版本。</li>
+<li><strong>许可证调整</strong>：JDK 8u211 之后 Oracle JDK 商用需订阅付费；JDK 17 起恢复 NFTC（No-Fee Terms and Conditions）免费商用。Adoptium（Eclipse Temurin）、Amazon Corretto、Azul Zulu 等免费发行版在各版本持续可用。</li>
+<li><strong>技术迁移链路</strong>：javax 到 jakarta 的命名空间迁移（随 Spring Boot 3.0 落地）是 JDK 8 到 17 升级路径上的主要工作量来源。</li>
 </ol>
 <p>这篇文章面向四代 LTS——JDK 8（2014）、JDK 17（2021）、JDK 21（2023）、JDK 25（2025）。每节不列流水账，只讲三件事：<strong>特性是什么、底层机制怎么运转、对生产环境意味着什么</strong>。如果你正在规划版本升级，或者想补齐这十年 Java 平台的演化脉络，往下读。</p>
 <p>说白了就是：这十年 Java 干了三件大事——把函数式编程请进家门、把线程从操作系统手里抢回 JVM、把启动速度和内存占用按在地上摩擦。下面一节一节拆开看。</p>
