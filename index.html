@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JDK 8 → 17 → 21 → 25：四代 LTS 的关键跃迁与升级实战</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<style>
+:root {
+  --bg: #0d1117;
+  --bg-soft: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --text-dim: #8b949e;
+  --accent: #ff7a45;
+  --accent-2: #58a6ff;
+  --code-bg: #0b0f14;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  line-height: 1.75;
+}
+#progress {
+  position: fixed; top: 0; left: 0; height: 3px; width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  z-index: 100;
+}
+.hero {
+  position: relative; overflow: hidden;
+  text-align: center; padding: 96px 24px 72px;
+  border-bottom: 1px solid var(--border);
+}
+.hero img.bg {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; opacity: .28; filter: blur(2px);
+}
+.hero h1 {
+  position: relative; font-size: clamp(1.6rem, 4vw, 2.6rem);
+  max-width: 900px; margin: 0 auto 16px; letter-spacing: .5px;
+}
+.hero .meta {
+  position: relative; color: var(--text-dim); font-size: .92rem;
+}
+.hero .meta a { color: var(--accent-2); text-decoration: none; }
+.layout { display: flex; max-width: 1280px; margin: 0 auto; gap: 40px; padding: 0 24px; }
+nav.toc {
+  flex: 0 0 260px; position: sticky; top: 24px; align-self: flex-start;
+  max-height: calc(100vh - 48px); overflow-y: auto;
+  padding: 20px 16px; background: var(--bg-soft);
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: .88rem;
+}
+nav.toc h2 { font-size: .8rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+nav.toc ul { list-style: none; }
+nav.toc li { margin: 4px 0; }
+nav.toc a {
+  color: var(--text-dim); text-decoration: none; display: block;
+  padding: 3px 8px; border-radius: 6px; transition: all .15s;
+}
+nav.toc a:hover { color: var(--text); background: rgba(255,122,69,.12); }
+.toc-sub { padding-left: 14px !important; border-left: 1px solid var(--border); margin-left: 6px; }
+main {
+  flex: 1; min-width: 0; padding: 40px 0 80px;
+  font-size: 1rem;
+}
+main h1 { font-size: 1.7rem; margin: 48px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+main h2 { font-size: 1.45rem; margin: 44px 0 14px; }
+main h3 { font-size: 1.2rem; margin: 32px 0 12px; color: var(--accent-2); }
+main p { margin: 14px 0; }
+main a { color: var(--accent-2); }
+main ul, main ol { margin: 12px 0 12px 24px; }
+main li { margin: 6px 0; }
+main blockquote {
+  margin: 18px 0; padding: 12px 18px;
+  background: rgba(255,122,69,.07);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0; color: var(--text-dim);
+}
+main code {
+  font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+  font-size: .88em; background: var(--code-bg);
+  padding: 2px 6px; border-radius: 5px; color: #ffab70;
+}
+main pre {
+  margin: 18px 0; padding: 18px; overflow-x: auto;
+  background: var(--code-bg); border: 1px solid var(--border);
+  border-radius: 10px; font-size: .86rem; line-height: 1.6;
+}
+main pre code { background: none; padding: 0; color: inherit; }
+main table {
+  width: 100%; border-collapse: collapse; margin: 18px 0;
+  font-size: .92rem; display: block; overflow-x: auto;
+}
+main th, main td {
+  border: 1px solid var(--border); padding: 9px 14px; text-align: left;
+}
+main th { background: var(--bg-soft); color: var(--accent-2); white-space: nowrap; }
+main img {
+  display: block; max-width: 100%; margin: 24px auto;
+  border-radius: 12px; border: 1px solid var(--border);
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+main em { color: var(--text-dim); }
+main img + em { display: block; text-align: center; margin-top: -16px; font-size: .85rem; }
+#top-btn {
+  position: fixed; right: 28px; bottom: 28px; width: 44px; height: 44px;
+  border-radius: 50%; border: 1px solid var(--border); background: var(--bg-soft);
+  color: var(--text-dim); font-size: 1.2rem; cursor: pointer; display: none;
+  align-items: center; justify-content: center; z-index: 99;
+}
+#top-btn:hover { color: var(--accent); border-color: var(--accent); }
+footer {
+  text-align: center; padding: 32px 24px; border-top: 1px solid var(--border);
+  color: var(--text-dim); font-size: .85rem;
+}
+@media (max-width: 960px) {
+  .layout { flex-direction: column; }
+  nav.toc { position: static; flex: none; max-height: none; }
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<header class="hero">
+  <img class="bg" src="assets/cover.png" alt="cover">
+  <h1>JDK 8 → 17 → 21 → 25：四代 LTS 的关键跃迁与升级实战</h1>
+  <div class="meta">2026-09-09 · 30 分钟阅读 · 参考自 <a href="https://juejin.cn/post/7625237255017299987" target="_blank" rel="noopener">掘金《JDK 8 → 17 → 21 → 25》</a> 重述改写</div>
+</header>
+
+<div class="layout">
+  <nav class="toc">
+    <h2>目录</h2>
+    <ul>
+<ul class="toc-sub">
+<li><a href="#一-引子-为什么-JDK-8-滞留了十年">一、引子：为什么 JDK 8 滞留了十年</a></li>
+<li><a href="#二-版本全景-定位-节奏与许可证">二、版本全景：定位、节奏与许可证</a></li>
+<ul class="toc-sub">
+<li><a href="#2-1-四个-LTS-的定位">2.1 四个 LTS 的定位</a></li>
+<li><a href="#2-2-发布节奏-从大版本主义到-train-model">2.2 发布节奏：从大版本主义到 train model</a></li>
+<li><a href="#2-3-许可证简史">2.3 许可证简史</a></li>
+<li><a href="#2-4-版本号格式">2.4 版本号格式</a></li>
+</ul>
+<li><a href="#三-语言特性演进">三、语言特性演进</a></li>
+<ul class="toc-sub">
+<li><a href="#3-1-JDK-8-函数式革命">3.1 JDK 8：函数式革命</a></li>
+<li><a href="#3-2-JDK-9-16-过渡特性-后来全部转正">3.2 JDK 9-16：过渡特性，后来全部转正</a></li>
+<li><a href="#3-3-JDK-17-特性成熟期">3.3 JDK 17：特性成熟期</a></li>
+<li><a href="#3-4-JDK-18-20-为-21-铺路">3.4 JDK 18-20：为 21 铺路</a></li>
+<li><a href="#3-5-JDK-21-并发模型与模式匹配的双响炮">3.5 JDK 21：并发模型与模式匹配的双响炮</a></li>
+<li><a href="#3-6-JDK-22-24-过渡期">3.6 JDK 22-24：过渡期</a></li>
+<li><a href="#3-7-JDK-25-极简语法时代">3.7 JDK 25：极简语法时代</a></li>
+</ul>
+<li><a href="#四-GC-演进-从-能用-到-极致">四、GC 演进：从"能用"到"极致"</a></li>
+<ul class="toc-sub">
+<li><a href="#4-1-起点-Parallel-与-CMS-时代-JDK-8">4.1 起点：Parallel 与 CMS 时代（JDK 8）</a></li>
+<li><a href="#4-2-G1-从可选到默认-JDK-9-17">4.2 G1：从可选到默认（JDK 9-17）</a></li>
+<li><a href="#4-3-ZGC-亚毫秒停顿之路-JDK-11-21">4.3 ZGC：亚毫秒停顿之路（JDK 11-21）</a></li>
+<li><a href="#4-4-Shenandoah-分代-JDK-25">4.4 Shenandoah 分代（JDK 25）</a></li>
+<li><a href="#4-5-选型速查">4.5 选型速查</a></li>
+</ul>
+<li><a href="#五-并发模型革命-Virtual-Threads">五、并发模型革命：Virtual Threads</a></li>
+<ul class="toc-sub">
+<li><a href="#5-1-平台线程的账本">5.1 平台线程的账本</a></li>
+<li><a href="#5-2-机制-把线程从-OS-资源变成-JVM-资源">5.2 机制：把线程从 OS 资源变成 JVM 资源</a></li>
+<li><a href="#5-3-三个坑">5.3 三个坑</a></li>
+<li><a href="#5-4-量级对比">5.4 量级对比</a></li>
+<li><a href="#5-5-Scoped-Values-JDK-25-转正-JEP-506">5.5 Scoped Values（JDK 25 转正，JEP 506）</a></li>
+<li><a href="#5-6-Structured-Concurrency-孵化中-JEP-428">5.6 Structured Concurrency（孵化中，JEP 428）</a></li>
+</ul>
+<li><a href="#六-JIT-与启动性能">六、JIT 与启动性能</a></li>
+<ul class="toc-sub">
+<li><a href="#6-1-分层编译">6.1 分层编译</a></li>
+<li><a href="#6-2-CDS-演进-启动优化的主线">6.2 CDS 演进：启动优化的主线</a></li>
+</ul>
+<li><a href="#7-内存模型-三笔内存账">7、内存模型：三笔内存账</a></li>
+<ul class="toc-sub">
+<li><a href="#7-1-Compact-Strings-JDK-9-JEP-254">7.1 Compact Strings（JDK 9，JEP 254）</a></li>
+<li><a href="#7-2-PermGen-Metaspace-JDK-8">7.2 PermGen → Metaspace（JDK 8）</a></li>
+<li><a href="#7-3-Compact-Object-Headers-JDK-25-JEP-519">7.3 Compact Object Headers（JDK 25，JEP 519）</a></li>
+</ul>
+<li><a href="#八-模块化系统-JPMS">八、模块化系统（JPMS）</a></li>
+<ul class="toc-sub">
+<li><a href="#8-1-module-info-java-的基本结构">8.1 module-info.java 的基本结构</a></li>
+<li><a href="#8-2-为什么业务项目普遍不用">8.2 为什么业务项目普遍不用</a></li>
+<li><a href="#8-3-但强封装必须正视">8.3 但强封装必须正视</a></li>
+</ul>
+<li><a href="#九-核心-API-变化">九、核心 API 变化</a></li>
+<ul class="toc-sub">
+<li><a href="#9-1-集合工厂与有序集合">9.1 集合工厂与有序集合</a></li>
+<li><a href="#9-2-HttpClient-JDK-11-标准化-JEP-321">9.2 HttpClient（JDK 11 标准化，JEP 321）</a></li>
+<li><a href="#9-3-FFM-API-JDK-22-转正">9.3 FFM API（JDK 22 转正）</a></li>
+<li><a href="#9-4-其他增量">9.4 其他增量</a></li>
+</ul>
+<li><a href="#十-安全增强">十、安全增强</a></li>
+<ul class="toc-sub">
+<li><a href="#10-1-算法禁用时间线">10.1 算法禁用时间线</a></li>
+<li><a href="#10-2-量子抗性">10.2 量子抗性</a></li>
+<li><a href="#10-3-框架适配版本表">10.3 框架适配版本表</a></li>
+</ul>
+<li><a href="#十一-生产迁移实践">十一、生产迁移实践</a></li>
+<ul class="toc-sub">
+<li><a href="#11-1-JDK-8-17-跨度最大的一次">11.1 JDK 8 → 17：跨度最大的一次</a></li>
+<li><a href="#11-2-JDK-17-21-平滑但要有策略">11.2 JDK 17 → 21：平滑但要有策略</a></li>
+<li><a href="#11-3-JDK-21-25">11.3 JDK 21 → 25</a></li>
+<li><a href="#11-4-性能基准">11.4 性能基准</a></li>
+</ul>
+<li><a href="#十二-选型建议">十二、选型建议</a></li>
+<ul class="toc-sub">
+<li><a href="#12-1-决策矩阵">12.1 决策矩阵</a></li>
+<li><a href="#12-2-分场景建议">12.2 分场景建议</a></li>
+<li><a href="#12-3-总结">12.3 总结</a></li>
+</ul>
+<li><a href="#参考资料">参考资料</a></li>
+</ul>
+    </ul>
+  </nav>
+  <main>
+<h1>JDK 8 → 17 → 21 → 25：四代 LTS 的关键跃迁与升级实战</h1>
+<blockquote>
+<p>标签：Java进阶 · JDK版本演进 · 性能调优 · 生产迁移</p>
+</blockquote>
+<h2 id="一-引子-为什么-JDK-8-滞留了十年">一、引子：为什么 JDK 8 滞留了十年</h2>
+<p>2014 年 3 月发布的 JDK 8，到今天依然是大量生产系统的基座。一个发布时就被称为"Java 史上最大变革"的版本，为什么反而成了拦路虎？</p>
+<p>三个原因叠加：</p>
+<ol>
+<li><strong>JDK 9 的跳票与 9-16 的"无 LTS 空窗"</strong>：JDK 9 原计划 2016 年发布，因模块化争议一路推迟到 2017 年。9 到 16 整整八个版本没有一个 LTS，生产团队没有"安全升级点"，干脆不动。</li>
+<li><strong>2019 年 4 月的 Oracle 收费新政</strong>：JDK 8u211 之后 Oracle JDK 商用需要订阅付费。消息传开后多数团队的解读是"Java 要收费了"，升级反而被按下暂停键——实际上 Adoptium、Corretto、Zulu 等免费发行版从未断供，但恐慌的惯性留了下来。</li>
+<li><strong>javax → jakarta 的迁移恐惧</strong>：从 JDK 8 到 17 的升级路上横着 Spring Boot 3.0 的命名空间迁移，对存量系统意味着大量文件改动，成了"再等等"的最后一根稻草。</li>
+</ol>
+<p>这篇文章面向四代 LTS——JDK 8（2014）、JDK 17（2021）、JDK 21（2023）、JDK 25（2025）。每节不列流水账，只讲三件事：<strong>特性是什么、底层机制怎么运转、对生产环境意味着什么</strong>。如果你正在规划版本升级，或者想补齐这十年 Java 平台的演化脉络，往下读。</p>
+<p>说白了就是：这十年 Java 干了三件大事——把函数式编程请进家门、把线程从操作系统手里抢回 JVM、把启动速度和内存占用按在地上摩擦。下面一节一节拆开看。</p>
+<h2 id="二-版本全景-定位-节奏与许可证">二、版本全景：定位、节奏与许可证</h2>
+<p><img alt="JDK 四大 LTS 发布时间线" src="assets/timeline.png" /></p>
+<p><em>JDK 四大 LTS 发布时间线</em></p>
+<h3 id="2-1-四个-LTS-的定位">2.1 四个 LTS 的定位</h3>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>发布时间</th>
+<th>类型</th>
+<th>核心定位</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDK 8</td>
+<td>2014 年 3 月</td>
+<td>LTS</td>
+<td>函数式编程引入；最后一个免费商用的 Oracle JDK</td>
+</tr>
+<tr>
+<td>JDK 17</td>
+<td>2021 年 9 月</td>
+<td>LTS</td>
+<td>许可证新政后首个免费商用版；语言特性成熟期</td>
+</tr>
+<tr>
+<td>JDK 21</td>
+<td>2023 年 9 月</td>
+<td>LTS</td>
+<td>Virtual Threads 转正，并发模型革命</td>
+</tr>
+<tr>
+<td>JDK 25</td>
+<td>2025 年 9 月</td>
+<td>LTS</td>
+<td>Compact Object Headers、Scoped Values、Leyden 成果落地</td>
+</tr>
+</tbody>
+</table>
+<h3 id="2-2-发布节奏-从大版本主义到-train-model">2.2 发布节奏：从大版本主义到 train model</h3>
+<p>理解 Java 生态演化，先看发布节奏的两段历史：</p>
+<ul>
+<li><strong>JDK 9 之前</strong>：2-3 年一个大版本，功能堆积严重，延期是常态。JDK 9 自己就跳票了三年。</li>
+<li><strong>JDK 9 之后</strong>：切换到 6 个月一班的"火车模型"（train model），每年 3 月和 9 月准点发车，特性赶不上车就进下一班预览。</li>
+<li><strong>LTS 节奏</strong>：最初每 3 年一版（8 → 11 → 17）；JDK 17 之后收紧为每 2 年一版（17 → 21 → 25）。</li>
+</ul>
+<p>这个策略直接影响选型。很多团队在 JDK 8 上一停十年，本质是 9 到 16 期间没有值得冒险的 LTS；JDK 17 是第一个让"该升了"成为共识的版本。</p>
+<h3 id="2-3-许可证简史">2.3 许可证简史</h3>
+<ul>
+<li>JDK 8 及之前：Oracle JDK 在 BCL（Binary Code License）下免费商用。</li>
+<li>2019 年 4 月起：JDK 8u211 之后的 Oracle JDK 商用需要付费订阅。</li>
+<li>JDK 17 起：Oracle 恢复 NFTC（No-Fee Terms and Conditions），Oracle JDK 重新免费商用，覆盖 17、21、25 这些 LTS。</li>
+<li>免费发行版生态：Adoptium Temurin、Amazon Corretto、Azul Zulu、微软 OpenJDK 在任何版本上都免费，多数生产团队早已切换。</li>
+</ul>
+<p>一句话记忆：<strong>Oracle JDK 只有 8u211 之后到 17 之前这个窗口"收费"，17 以后又免费了；发行版选择看合规不看钱包。</strong></p>
+<h3 id="2-4-版本号格式">2.4 版本号格式</h3>
+<p>顺带一提：JDK 8 的内部版本号是 1.8，从 JDK 9 起 JEP 223 把格式统一为单数字。老代码里判断版本号的 <code>java.version</code> 字符串逻辑，升级后要记得适配。</p>
+<h2 id="三-语言特性演进">三、语言特性演进</h2>
+<p><img alt="Stream 管道：惰性中间操作 + 终端操作触发执行" src="assets/stream-pipeline.png" /></p>
+<p><em>Stream 管道：惰性中间操作 + 终端操作触发执行</em></p>
+<h3 id="3-1-JDK-8-函数式革命">3.1 JDK 8：函数式革命</h3>
+<p>JDK 8 一次引入 Lambda、Stream、Optional、java.time 四大件，把 Java 从"命令式老学究"改造成"函数式混合体"。</p>
+<p><strong>Lambda 不是匿名内部类的语法糖</strong></p>
+<pre><code class="language-java">// JDK 7：匿名内部类
+Collections.sort(names, new Comparator&lt;String&gt;() {
+    @Override
+    public int compare(String a, String b) { return a.compareTo(b); }
+});
+
+// JDK 8：Lambda 与方法引用
+names.sort(String::compareTo);
+</code></pre>
+<p>底层机制值得较真：编译器对 Lambda 使用 <code>invokedynamic</code> 指令，运行时由 <code>LambdaMetafactory</code> 动态生成实现类，而不是编译期生成 <code>MyClass$1.class</code>。用 <code>javap -c -p</code> 反编译能看到差异——匿名内部类多一个 class 文件，Lambda 只有一条 invokedynamic。</p>
+<p><strong>Stream：惰性求值是灵魂</strong></p>
+<pre><code class="language-java">List&lt;String&gt; vipEmails = orders.stream()
+    .filter(o -&gt; o.getAmount().compareTo(new BigDecimal(&quot;10000&quot;)) &gt; 0)
+    .map(Order::getCustomer)
+    .filter(c -&gt; c.getVipLevel() &gt;= 3)
+    .map(Customer::getEmail)
+    .distinct()
+    .sorted()
+    .collect(Collectors.toList());
+</code></pre>
+<p>filter/map 等中间操作只是搭管道，collect 这类终端操作才触发执行。<strong>生产提醒</strong>：parallel stream 慎用——它底层是全局共享的 ForkJoinPool.commonPool()，在 HTTP 请求线程里跑 parallel stream，一个耗时任务会拖累所有并发请求。我们线上吃过这个亏，接口超时排查半天，最后定位到一处 <code>parallelStream().forEach</code> 里的远程调用。</p>
+<p><strong>Optional 与 java.time</strong>：Optional 链式处理可能为 null 的取值；java.time 的 LocalDateTime、ZonedDateTime、Duration 终结了 <code>java.util.Date</code> 的线程安全噩梦和 <code>Calendar</code> 的月份从 0 计数的反人类设计。</p>
+<h3 id="3-2-JDK-9-16-过渡特性-后来全部转正">3.2 JDK 9-16：过渡特性，后来全部转正</h3>
+<p>这八年被很多人跳过，但它们奠定了现代 Java 的全部语法。不了解演化过程，用 JDK 17/21 时会觉得这些特性"凭空冒出来"。</p>
+<p><strong>JDK 9</strong>：模块系统（第八节展开）、JShell、集合工厂方法 <code>List.of()</code>、接口私有方法：</p>
+<pre><code class="language-java">public interface Validator {
+    default boolean isValid(String input) {
+        return !isEmpty(input) &amp;&amp; checkFormat(input);
+    }
+    private boolean isEmpty(String input) { return input == null || input.isBlank(); }
+    private boolean checkFormat(String input) { return input.matches(&quot;[a-zA-Z]+&quot;); }
+}
+</code></pre>
+<p><strong>JDK 10</strong>：<code>var</code> 局部变量类型推断——注意它是编译期推断，不是动态类型：</p>
+<pre><code class="language-java">var userList = new ArrayList&lt;User&gt;();   // 编译后就是 ArrayList&lt;User&gt;
+</code></pre>
+<p><strong>JDK 11</strong>：String 新方法、单文件执行、HttpClient 标准化：</p>
+<pre><code class="language-java">&quot;  hello  &quot;.strip();      // Unicode 感知的 trim
+&quot;hello&quot;.repeat(3);        // &quot;hellohellohello&quot;
+&quot;line1\nline2&quot;.lines()    // Stream&lt;String&gt;
+    .forEach(System.out::println);
+// $ java HelloWorld.java  单文件直接执行，省掉 javac
+</code></pre>
+<p><strong>JDK 13-15</strong>：Text Blocks 三行写 JSON/SQL：</p>
+<pre><code class="language-java">String json = &quot;&quot;&quot;
+        {
+            &quot;name&quot;: &quot;张三&quot;,
+            &quot;roles&quot;: [&quot;admin&quot;, &quot;user&quot;]
+        }
+        &quot;&quot;&quot;;
+</code></pre>
+<p><strong>JDK 14</strong>：Records 与 instanceof 模式匹配开始预览，同时上线了 helpful NPE——报错从干巴巴的 <code>NullPointerException</code> 变成 <code>Cannot invoke "String.length()" because "a.b.name" is null</code>，排查效率提升一个数量级。</p>
+<p><strong>JDK 16</strong>：Records 与 instanceof 模式匹配转正，<code>Stream.toList()</code> 取代 <code>collect(Collectors.toList())</code>。</p>
+<h3 id="3-3-JDK-17-特性成熟期">3.3 JDK 17：特性成熟期</h3>
+<p>JDK 17 把 14-16 预览的特性全部转正，形成完整的"现代 Java"特性集。标志性的是 Sealed Classes：</p>
+<pre><code class="language-java">public sealed interface Shape permits Circle, Rectangle, Triangle {
+    double area();
+}
+public record Circle(double radius) implements Shape {
+    public double area() { return Math.PI * radius * radius; }
+}
+public record Rectangle(double width, double height) implements Shape {
+    public double area() { return width * height; }
+}
+public record Triangle(double base, double height) implements Shape {
+    public double area() { return 0.5 * base * height; }
+}
+</code></pre>
+<p>密封层级配合模式匹配时编译器能做穷举检查——这是 JDK 21 switch 模式匹配的前提。JDK 17 其余值得记的变化：强封装 JDK 内部 API（<code>--illegal-access=permit</code> 失效）、移除 AOT/JIT 的 Graal 实验接口（用 GraalVM 需单独安装）、移除 RMI Activation、恢复始终严格的浮点语义。</p>
+<h3 id="3-4-JDK-18-20-为-21-铺路">3.4 JDK 18-20：为 21 铺路</h3>
+<ul>
+<li><strong>JDK 18</strong>：UTF-8 成为默认字符编码（JEP 400，跨平台中文乱码问题的终结点）；Simple Web Server（<code>jwebserver</code>）零依赖起静态服务。</li>
+<li><strong>JDK 19</strong>：Virtual Threads 首次预览（JEP 425）、Structured Concurrency 孵化（JEP 428）。</li>
+<li><strong>JDK 20</strong>：Scoped Values 孵化（JEP 429）、Record Patterns 二次预览。</li>
+</ul>
+<h3 id="3-5-JDK-21-并发模型与模式匹配的双响炮">3.5 JDK 21：并发模型与模式匹配的双响炮</h3>
+<p><strong>Pattern Matching for switch（JEP 441）</strong>——密封类 + switch 的完整体验：</p>
+<pre><code class="language-java">public static double calculateArea(Shape shape) {
+    return switch (shape) {
+        case Circle c    -&gt; Math.PI * c.radius() * c.radius();
+        case Rectangle r -&gt; r.width() * r.height();
+        case Triangle t  -&gt; 0.5 * t.base() * t.height();
+        // 密封接口子类全覆盖，不需要 default
+    };
+}
+
+// 带守卫
+case Circle c when c.radius() &gt; 100 -&gt; &quot;大圆&quot;;
+case Circle c                        -&gt; &quot;小圆&quot;;
+</code></pre>
+<p><strong>Record Patterns（JEP 440）</strong>——嵌套解构：</p>
+<pre><code class="language-java">record Point(int x, int y) {}
+record Line(Point start, Point end) {}
+
+static void printLength(Object obj) {
+    if (obj instanceof Line(Point(var x1, var y1), Point(var x2, var y2))) {
+        double length = Math.hypot(x2 - x1, y2 - y1);
+        System.out.printf(&quot;Line length: %.2f%n&quot;, length);
+    }
+}
+</code></pre>
+<p><strong>Sequenced Collections（JEP 431）</strong>——统一有序集合操作，<code>LinkedHashSet</code> 取尾元素不再需要遍历：</p>
+<pre><code class="language-java">SequencedCollection&lt;String&gt; seq = new LinkedHashSet&lt;&gt;(List.of(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;));
+String first = seq.getFirst();     // &quot;a&quot;
+String last  = seq.getLast();      // &quot;c&quot;
+SequencedCollection&lt;String&gt; reversed = seq.reversed();   // [c, b, a]
+</code></pre>
+<p>Virtual Threads 是 JDK 21 的绝对主角，第五节单独展开。另注：String Templates 在 JDK 21 预览、22 二次预览后，因设计争议于 JDK 23 被撤回——升级到 21 用到过 <code>STR."..."</code> 的团队要留意这个语法已不归路。</p>
+<h3 id="3-6-JDK-22-24-过渡期">3.6 JDK 22-24：过渡期</h3>
+<ul>
+<li><strong>JDK 22</strong>：FFM API（JEP 454）转正；未命名变量 <code>_</code>（JEP 456）：</li>
+</ul>
+<pre><code class="language-java">try {
+    int result = Integer.parseInt(input);
+} catch (NumberFormatException _) {
+    System.out.println(&quot;Invalid number&quot;);
+}
+</code></pre>
+<ul>
+<li><strong>JDK 23</strong>：原始类型模式匹配预览（JEP 455）、Markdown 文档注释（JEP 467）。</li>
+<li><strong>JDK 24</strong>：Stream Gatherers 转正（JEP 485）——自定义中间操作，滑动窗口一行搞定：</li>
+</ul>
+<pre><code class="language-java">List&lt;List&lt;Integer&gt;&gt; windows = Stream.of(1, 2, 3, 4, 5)
+    .gather(Gatherers.windowSliding(3))
+    .toList();
+// [[1,2,3], [2,3,4], [3,4,5]]
+</code></pre>
+<p>JDK 24 还有两个重量级变化：Class-File API 转正（JEP 484）、<strong>虚拟线程解除 synchronized pinning</strong>（JEP 491，5.3 节详述）。</p>
+<h3 id="3-7-JDK-25-极简语法时代">3.7 JDK 25：极简语法时代</h3>
+<p>JDK 25 共 18 个 JEP，其中 7 个从预览转正，最直观的是"Java 也能像脚本一样写"：</p>
+<pre><code class="language-java">// 完整程序，不需要 public class、不需要 static、不需要 String[] args
+void main() {
+    println(&quot;Hello, World!&quot;);
+}
+</code></pre>
+<p>配套的 Module Import（JEP 511）把 <code>import java.util.*</code> 等一堆导入压成一行：</p>
+<pre><code class="language-java">import module java.base;
+var list = List.of(1, 2, 3);
+var path = Path.of(&quot;/tmp&quot;);
+</code></pre>
+<p><strong>Flexible Constructor Bodies（JEP 513）</strong>——<code>super()</code> 之前终于能做校验：</p>
+<pre><code class="language-java">public class ValidatedOrder extends Order {
+    public ValidatedOrder(String orderId, BigDecimal amount) {
+        if (orderId == null || orderId.isBlank()) {
+            throw new IllegalArgumentException(&quot;orderId cannot be empty&quot;);
+        }
+        this.validatedAt = Instant.now();
+        super(orderId, amount);   // 校验、初始化都在父类构造之前
+    }
+}
+</code></pre>
+<p>其余重点：Compact Object Headers（JEP 519，第七节）、Scoped Values 转正（JEP 506，第五节）、AOT Method Profiling（JEP 515，第六节）、Generational Shenandoah 转正（JEP 521，第四节）、Stable Values 预览（JEP 502，延迟初始化但享受 final 优化）。</p>
+<h2 id="四-GC-演进-从-能用-到-极致">四、GC 演进：从"能用"到"极致"</h2>
+<p>GC 是版本升级最直接的收益来源。四个 LTS 横跨了 Java GC 从"够用"到"极致"的全程。</p>
+<h3 id="4-1-起点-Parallel-与-CMS-时代-JDK-8">4.1 起点：Parallel 与 CMS 时代（JDK 8）</h3>
+<p>JDK 8 默认 GC 是 Parallel（吞吐量优先，适合批处理）；多数 Web 服务选 CMS（低延迟）或 G1（均衡）：</p>
+<pre><code class="language-bash"># CMS：低延迟优先，但并发失败会掉进秒级 Full GC
+java -XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=75 \
+     -Xms4g -Xmx4g -jar app.jar
+
+# G1：平衡型
+java -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Xms4g -Xmx4g -jar app.jar
+</code></pre>
+<p>JDK 8 时代 GC 的四个痛点：CMS 并发失败触发秒级停顿、CMS 内存碎片需定期重启、G1 尚不成熟且 Full GC 单线程（JDK 10 才并行）、PermGen 单独调优且常 OOM。</p>
+<h3 id="4-2-G1-从可选到默认-JDK-9-17">4.2 G1：从可选到默认（JDK 9-17）</h3>
+<p>G1 的 Region 化堆设计：堆被切成等大 Region，Young GC 疏散 Eden/Survivor，并发标记后 Mixed GC 只回收部分 Old Region，Full GC 兜底。关键升级时间线：</p>
+<table>
+<thead>
+<tr>
+<th>变化</th>
+<th>版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>G1 成为默认 GC</td>
+<td>JDK 9</td>
+</tr>
+<tr>
+<td>CMS 标记废弃</td>
+<td>JDK 9</td>
+</tr>
+<tr>
+<td>G1 Full GC 并行化</td>
+<td>JDK 10</td>
+</tr>
+<tr>
+<td>可中断 Mixed GC</td>
+<td>JDK 12</td>
+</tr>
+<tr>
+<td>归还未用堆给操作系统</td>
+<td>JDK 12</td>
+</tr>
+<tr>
+<td>NUMA 感知分配</td>
+<td>JDK 14</td>
+</tr>
+<tr>
+<td>CMS 移除</td>
+<td>JDK 14</td>
+</tr>
+</tbody>
+</table>
+<p>JDK 17 推荐配置：</p>
+<pre><code class="language-bash">java -XX:+UseG1GC -XX:MaxGCPauseMillis=100 \
+     -XX:G1HeapRegionSize=16m -XX:InitiatingHeapOccupancyPercent=35 \
+     -Xms8g -Xmx8g -jar app.jar
+</code></pre>
+<h3 id="4-3-ZGC-亚毫秒停顿之路-JDK-11-21">4.3 ZGC：亚毫秒停顿之路（JDK 11-21）</h3>
+<p>ZGC 用染色指针（colored pointers）+ 读屏障实现并发整理，停顿与堆大小无关。JDK 11 实验、15 转正、21 引入分代（JEP 439）：</p>
+<pre><code class="language-bash"># JDK 21 分代 ZGC
+java -XX:+UseZGC -XX:+ZGenerational -Xms16g -Xmx16g -jar app.jar
+</code></pre>
+<p>为什么 ZGC 需要分代：非分代模式下每次 GC 扫描整个堆，停顿时长短但扫描开销大、吞吐量吃亏；分代后年轻代高频小范围回收、老年代低频回收，吞吐量提升 10-20%。</p>
+<p>实测数据（电商下单链路，16G 堆、8 核）：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>G1 (JDK 17)</th>
+<th>ZGC 非分代 (JDK 17)</th>
+<th>ZGC 分代 (JDK 21)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>P99 停顿</td>
+<td>35ms</td>
+<td>0.5ms</td>
+<td>0.3ms</td>
+</tr>
+<tr>
+<td>P999 停顿</td>
+<td>120ms</td>
+<td>1.2ms</td>
+<td>0.8ms</td>
+</tr>
+<tr>
+<td>吞吐量 TPS</td>
+<td>12,500</td>
+<td>11,800</td>
+<td>13,200</td>
+</tr>
+</tbody>
+</table>
+<p>分代 ZGC 同时赢下了停顿时长和吞吐量。注意：JDK 24 起非分代 ZGC 被移除（JEP 490），<code>-XX:+ZGenerational</code> 参数也不再接受——默认就是分代。</p>
+<h3 id="4-4-Shenandoah-分代-JDK-25">4.4 Shenandoah 分代（JDK 25）</h3>
+<p>Shenandoah 与 ZGC 同属低停顿流派，由 Red Hat 主导。JDK 15 转正，JDK 25 引入分代支持（JEP 521）：</p>
+<pre><code class="language-bash">java -XX:+UseShenandoahGC -XX:ShenandoahGCMode=generational \
+     -Xms16g -Xmx16g -jar app.jar
+</code></pre>
+<h3 id="4-5-选型速查">4.5 选型速查</h3>
+<p><img alt="GC 选型速览：按延迟与吞吐诉求分流" src="assets/gc-choice.png" /></p>
+<p><em>GC 选型速览：按延迟与吞吐诉求分流</em></p>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐 GC</th>
+<th>关键参数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>微服务（&lt;4G 堆）</td>
+<td>G1</td>
+<td><code>-XX:MaxGCPauseMillis=100</code></td>
+</tr>
+<tr>
+<td>大堆低延迟</td>
+<td>ZGC（分代）</td>
+<td><code>-XX:+UseZGC</code></td>
+</tr>
+<tr>
+<td>交易系统亚毫秒要求</td>
+<td>ZGC（分代）</td>
+<td><code>-XX:+UseZGC -XX:SoftMaxHeapSize=X</code></td>
+</tr>
+<tr>
+<td>批处理/大数据</td>
+<td>G1 或 Parallel</td>
+<td><code>-XX:+UseG1GC</code> 或 <code>-XX:+UseParallelGC</code></td>
+</tr>
+<tr>
+<td>容器内存受限</td>
+<td>G1 + Compact Headers</td>
+<td><code>-XX:+UseG1GC -XX:+UseCompactObjectHeaders</code></td>
+</tr>
+<tr>
+<td>Red Hat 生态</td>
+<td>Shenandoah（分代）</td>
+<td><code>-XX:+UseShenandoahGC</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>真实迁移案例</strong>：订单服务 JDK 8 + CMS、8G 堆，高峰期 CMS concurrent mode failure 触发 3-5 秒 Full GC，上游网关批量超时。迁移 JDK 17 + G1 后 P99 停顿降到 50ms 以内；再升 JDK 21 + 分代 ZGC + 16G 堆，P99 到 0.5ms，业务代码基本感知不到 GC。</p>
+<h2 id="五-并发模型革命-Virtual-Threads">五、并发模型革命：Virtual Threads</h2>
+<p>JDK 21 是继 JDK 8 之后平台最重大的变革，核心就是 JEP 444 Virtual Threads。</p>
+<h3 id="5-1-平台线程的账本">5.1 平台线程的账本</h3>
+<p>传统 Platform Thread 与 OS 线程一一对应：</p>
+<ul>
+<li>每线程默认 1MB 栈（<code>-Xss1m</code>）</li>
+<li>创建销毁走 <code>pthread_create</code>/<code>pthread_exit</code> 系统调用</li>
+<li>上下文切换在内核态完成</li>
+<li>单 JVM 能创建的线程数通常几千到几万</li>
+</ul>
+<p>对 I/O 密集的 Web 服务，这意味着：10 万并发就要 10 万个 OS 线程，内存先爆；用 200 个线程的池扛 10 万请求，只能排队。</p>
+<h3 id="5-2-机制-把线程从-OS-资源变成-JVM-资源">5.2 机制：把线程从 OS 资源变成 JVM 资源</h3>
+<p>Virtual Thread 由 JVM 调度，不再 1:1 映射 OS 线程：</p>
+<ul>
+<li>阻塞时（I/O、sleep、锁等待）自动从载体线程（carrier thread）<strong>卸载</strong>（unmount），载体线程立刻去跑别的任务</li>
+<li>阻塞解除后挂到任意空闲载体线程继续执行</li>
+<li>状态保存恢复靠 Continuation，栈按需增长，初始只占几百字节</li>
+</ul>
+<p>三种创建方式：</p>
+<pre><code class="language-java">// 1. 直接启动
+Thread vt = Thread.startVirtualThread(() -&gt; doWork());
+
+// 2. 命名工厂
+Thread vt2 = Thread.ofVirtual().name(&quot;worker-&quot;, 0).start(() -&gt; doWork());
+
+// 3. 生产推荐：每任务一线程的执行器
+try (var executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    IntStream.range(0, 100_000).forEach(i -&gt;
+        executor.submit(() -&gt; {
+            Thread.sleep(Duration.ofSeconds(1));
+            return i;
+        }));
+}
+</code></pre>
+<h3 id="5-3-三个坑">5.3 三个坑</h3>
+<ol>
+<li><strong>synchronized 中的阻塞会 pinning</strong>：JDK 21 里虚拟线程在 <code>synchronized</code> 块内做阻塞 I/O 时无法卸载，载体线程被钉住。JDK 24 的 JEP 491 解除了这个限制（阻塞时改用 JVM 内部机制重写锁语义），JDK 21 用户要么升级，要么改用 <code>ReentrantLock</code>：</li>
+</ol>
+<pre><code class="language-java">// JDK 21 不推荐：synchronized 内阻塞导致 pinning
+synchronized (lock) { connection.read(); }
+
+// 推荐
+private final ReentrantLock lock = new ReentrantLock();
+lock.lock();
+try { connection.read(); } finally { lock.unlock(); }
+</code></pre>
+<ol start="2">
+<li><strong>不要池化虚拟线程</strong>：设计理念是 one task one thread，拿线程池管理虚拟线程是反模式，直接 <code>newVirtualThreadPerTaskExecutor()</code>。</li>
+<li><strong>ThreadLocal 的内存账</strong>：百万虚拟线程各持 ThreadLocal 副本时内存可观，JDK 21 起用 Scoped Values 替代（见 5.5）。</li>
+</ol>
+<h3 id="5-4-量级对比">5.4 量级对比</h3>
+<p>10 万任务、每个阻塞 100ms：200 线程池的 Platform Thread 至少需要 <code>100000 / 200 × 0.1 = 50</code> 秒；虚拟线程 10 万任务同时 sleep，约 0.1-0.2 秒完成。典型基准输出：</p>
+<pre><code class="language-text">Platform Threads (200 pool): 50.12 seconds
+Virtual Threads:              0.15 seconds
+</code></pre>
+<h3 id="5-5-Scoped-Values-JDK-25-转正-JEP-506">5.5 Scoped Values（JDK 25 转正，JEP 506）</h3>
+<p>ThreadLocal 的现代替代，与虚拟线程天然契合：</p>
+<pre><code class="language-java">private static final ScopedValue&lt;UserContext&gt; CURRENT_USER = ScopedValue.newInstance();
+
+public void handleRequest(HttpRequest request) {
+    UserContext ctx = authenticate(request);
+    ScopedValue.runWhere(CURRENT_USER, ctx, () -&gt; processRequest(request));
+    // 作用域结束自动释放，不存在忘记 remove 的内存泄漏
+}
+
+public void processRequest(HttpRequest request) {
+    UserContext user = CURRENT_USER.get();
+}
+</code></pre>
+<p>与 ThreadLocal 的本质差异：值不可变（ThreadLocal 可随意 set）；生命周期由作用域界定（ThreadLocal 需手动 remove）；虚拟线程继承零成本（ThreadLocal 需复制）。</p>
+<h3 id="5-6-Structured-Concurrency-孵化中-JEP-428">5.6 Structured Concurrency（孵化中，JEP 428）</h3>
+<p>"父任务 fork 子任务、任一失败取消其余"的结构化并发模型，把散落的线程管理收进 try-with-resources 语义：</p>
+<pre><code class="language-java">try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+    Future&lt;String&gt; user = scope.fork(this::loadUser);
+    Future&lt;Order&gt; order = scope.fork(this::loadOrder);
+    scope.join().throwIfFailed();
+    return new Result(user.resultNow(), order.resultNow());
+}
+// scope 关闭时所有子任务已结束，无泄漏线程
+</code></pre>
+<h2 id="六-JIT-与启动性能">六、JIT 与启动性能</h2>
+<p><img alt="JIT 分层编译：解释器 → C1 → C2 逐级优化" src="assets/jit-tiers.png" /></p>
+<p><em>JIT 分层编译：解释器 → C1 → C2 逐级优化</em></p>
+<h3 id="6-1-分层编译">6.1 分层编译</h3>
+<p>JVM 用 C1（编译快、优化浅）和 C2（编译慢、优化深）协作：Level 0 解释执行，Level 1-3 是 C1 带不同深度的 profiling，Level 4 是 C2 终极优化。热点代码逐级升迁，冷代码停在解释层——这是"预热后变快"的机制根源。</p>
+<pre><code class="language-bash">java -XX:+PrintCompilation -XX:+UnlockDiagnosticVMOptions \
+     -XX:+PrintInlining -jar app.jar
+</code></pre>
+<p>Graal 曾在 JDK 10-17 作为实验性 JIT 存在，JDK 17 移除接口（JEP 410）后，Graal 的重心全部转移到 GraalVM 项目。</p>
+<h3 id="6-2-CDS-演进-启动优化的主线">6.2 CDS 演进：启动优化的主线</h3>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDK 8</td>
+<td>基础 CDS，只归档 bootstrap 类</td>
+</tr>
+<tr>
+<td>JDK 10</td>
+<td>AppCDS（JEP 310），支持应用类</td>
+</tr>
+<tr>
+<td>JDK 13</td>
+<td>动态 CDS（JEP 350），退出时自动归档</td>
+</tr>
+<tr>
+<td>JDK 19</td>
+<td>默认启用 CDS 归档</td>
+</tr>
+<tr>
+<td>JDK 24</td>
+<td>AOT 类加载与链接（JEP 483）</td>
+</tr>
+<tr>
+<td>JDK 25</td>
+<td>AOT Method Profiling（JEP 515），复用 profiling 加速 JIT 预热</td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-bash"># JDK 17 动态 CDS：第一次跑生成归档
+java -XX:ArchiveClassesAtExit=app-cds.jsa -jar app.jar
+# 之后每次复用，启动提速 20-40%
+java -XX:SharedArchiveFile=app-cds.jsa -jar app.jar
+
+# JDK 24+ AOT 缓存
+java -XX:AOTCache=app.aot -XX:AOTConfiguration=app.aotconf -jar app.jar
+</code></pre>
+<p>Spring Boot 3.x 中等规模应用（50 Bean）冷启动实测：</p>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>冷启动</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDK 8</td>
+<td>4.2s</td>
+</tr>
+<tr>
+<td>JDK 17</td>
+<td>3.8s</td>
+</tr>
+<tr>
+<td>JDK 17 + CDS</td>
+<td>2.9s</td>
+</tr>
+<tr>
+<td>JDK 21 + CDS</td>
+<td>2.5s</td>
+</tr>
+<tr>
+<td>JDK 25 + AOT Cache</td>
+<td>1.8s</td>
+</tr>
+<tr>
+<td>GraalVM Native Image</td>
+<td>0.08s</td>
+</tr>
+</tbody>
+</table>
+<p>容器化与 Serverless 场景下，CDS/AOT 是成本最低的启动优化；要极致冷启动才考虑 Native Image（代价是构建复杂度和反射配置）。</p>
+<h2 id="7-内存模型-三笔内存账">7、内存模型：三笔内存账</h2>
+<h3 id="7-1-Compact-Strings-JDK-9-JEP-254">7.1 Compact Strings（JDK 9，JEP 254）</h3>
+<p>JDK 8 的 String 内部是 <code>char[]</code>，每字符固定 2 字节（UTF-16）。JDK 9 改为 <code>byte[] + coder</code>：Latin-1 字符 1 字节，非 Latin-1 才 2 字节。以英文和数字为主的后端服务，String 内存占用直接减半。我们的日志分析服务升到 JDK 11 后，堆从 6G 降到 4.2G，没改一行业务代码。</p>
+<h3 id="7-2-PermGen-Metaspace-JDK-8">7.2 PermGen → Metaspace（JDK 8）</h3>
+<p>JDK 8 把永久代换成位于本地内存（而非堆）的 Metaspace：<code>OutOfMemoryError: PermGen space</code> 成为历史，类卸载更高效，容量默认不设限（用 <code>-XX:MaxMetaspaceSize</code> 兜底）。升级 JDK 8 时，<code>-XX:PermSize</code>/<code>-XX:MaxPermSize</code> 参数直接删除。</p>
+<h3 id="7-3-Compact-Object-Headers-JDK-25-JEP-519">7.3 Compact Object Headers（JDK 25，JEP 519）</h3>
+<p>Project Lilliput 的核心成果：64 位 JVM 上对象头从 96-128 bits 压到 64 bits。原理是把 class pointer 从 32 bits 压到 22 bits（最大类数从 2^32 降到约 400 万，绝大多数应用无感），与 mark word 合存于一个 64-bit word。</p>
+<pre><code class="language-bash">java -XX:+UseCompactObjectHeaders -jar app.jar
+</code></pre>
+<p>内存账实例（开启指针压缩）：</p>
+<pre><code class="language-java">// int + boolean 两字段对象
+// JDK 8-24: header(12B) + int(4B) + boolean(1B) + padding(7B) = 24B
+// JDK 25:   header(8B)  + int(4B) + boolean(1B) + padding(3B) = 16B
+// 省 8B，33%
+</code></pre>
+<p>大量小对象场景（DTO、Event、图节点）收益可观，实测堆占用降 10-20%、部分基准 CPU 时间降 8%。注意 JDK 25 中需显式 <code>-XX:+UseCompactObjectHeaders</code> 开启。</p>
+<h2 id="八-模块化系统-JPMS">八、模块化系统（JPMS）</h2>
+<p>JDK 9 引入的 Project Jigsaw 核心成果。直说结论：到 2025 年大部分业务项目依然没用模块系统，但它对 JDK 自身内部 API 的管控影响深远。</p>
+<h3 id="8-1-module-info-java-的基本结构">8.1 module-info.java 的基本结构</h3>
+<pre><code class="language-java">module com.myapp.order {
+    requires java.sql;
+    requires transitive com.myapp.common;   // 传递依赖
+
+    exports com.myapp.order.api;            // 只有导出的包外部可见
+    opens com.myapp.order.entity to com.fasterxml.jackson.databind;  // 定向反射开放
+
+    provides com.myapp.common.spi.PaymentProvider
+        with com.myapp.order.payment.AlipayProvider;   // SPI
+    uses com.myapp.common.spi.NotificationService;
+}
+</code></pre>
+<h3 id="8-2-为什么业务项目普遍不用">8.2 为什么业务项目普遍不用</h3>
+<p>三个原因：Spring 依赖大量反射与动态代理，与强封装天然冲突（Spring 5+ 提供 <code>Automatic-Module-Name</code> 但完整模块化不是优先项）；第三方库模块化程度参差，混用易踩 split package；对多数业务应用，Maven/Gradle 依赖管理 + 包访问控制已够用，JPMS 的强隔离收益不抵成本。</p>
+<h3 id="8-3-但强封装必须正视">8.3 但强封装必须正视</h3>
+<p>JDK 16 起 <code>--illegal-access</code> 移除、内部 API 默认强封装。直接用了 <code>sun.misc.Unsafe</code>、<code>com.sun.xml.internal.*</code> 的代码，升级时要做两选一：</p>
+<pre><code class="language-bash"># 临时过渡（不推荐长期）
+java --add-opens java.base/java.lang=ALL-UNNAMED \
+     --add-opens java.base/sun.nio.ch=ALL-UNNAMED -jar app.jar
+
+# 正确姿势：换成公开 API
+# sun.misc.Unsafe        → VarHandle (JDK 9+)
+# sun.misc.BASE64Encoder → java.util.Base64 (JDK 8+)
+# sun.reflect.Reflection → StackWalker (JDK 9+)
+</code></pre>
+<h2 id="九-核心-API-变化">九、核心 API 变化</h2>
+<h3 id="9-1-集合工厂与有序集合">9.1 集合工厂与有序集合</h3>
+<pre><code class="language-java">// JDK 9 工厂方法
+List&lt;String&gt; list = List.of(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;);
+Map&lt;String, Integer&gt; map = Map.of(&quot;one&quot;, 1, &quot;two&quot;, 2);
+
+// JDK 16 Stream.toList()：不可变，替代 collect(Collectors.toList())
+List&lt;String&gt; filtered = list.stream().filter(s -&gt; s.startsWith(&quot;a&quot;)).toList();
+
+// JDK 21 SequencedCollection
+SequencedCollection&lt;String&gt; seq = new ArrayList&lt;&gt;(List.of(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;));
+seq.addFirst(&quot;z&quot;);
+seq.getFirst();  // &quot;z&quot;
+</code></pre>
+<h3 id="9-2-HttpClient-JDK-11-标准化-JEP-321">9.2 HttpClient（JDK 11 标准化，JEP 321）</h3>
+<p><code>HttpURLConnection</code> 是公认的烂 API：阻塞、冗长、不支持 HTTP/2。新 HttpClient 异步、支持 HTTP/2 与流式：</p>
+<pre><code class="language-java">HttpClient client = HttpClient.newBuilder()
+    .version(HttpClient.Version.HTTP_2)
+    .connectTimeout(Duration.ofSeconds(5))
+    .build();
+
+HttpRequest request = HttpRequest.newBuilder()
+    .uri(URI.create(&quot;https://api.example.com/users&quot;))
+    .header(&quot;Accept&quot;, &quot;application/json&quot;)
+    .timeout(Duration.ofSeconds(10))
+    .GET().build();
+
+// 异步
+client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+    .thenApply(HttpResponse::body)
+    .thenAccept(System.out::println);
+</code></pre>
+<h3 id="9-3-FFM-API-JDK-22-转正">9.3 FFM API（JDK 22 转正）</h3>
+<p>Project Panama 成果，目标是取代 JNI。纯 Java 调用本地库，Arena 作用域自动管理内存：</p>
+<pre><code class="language-java">Linker linker = Linker.nativeLinker();
+MemorySegment strlenAddr = linker.defaultLookup().find(&quot;strlen&quot;).orElseThrow();
+MethodHandle strlen = linker.downcallHandle(strlenAddr,
+    FunctionDescriptor.of(ValueLayout.JAVA_LONG, ValueLayout.ADDRESS));
+
+try (Arena arena = Arena.ofConfined()) {
+    MemorySegment cString = arena.allocateFrom(&quot;Hello, FFM!&quot;);
+    long length = (long) strlen.invoke(cString);   // 11
+}
+// Arena 关闭即释放，无泄漏
+</code></pre>
+<p>对比 JNI：内存生命周期 Java 层管理、纯 Java 无需 C 头文件、无 boundary crossing 开销，配合 <code>jextract</code> 工具可从 C 头文件自动生成绑定。</p>
+<h3 id="9-4-其他增量">9.4 其他增量</h3>
+<pre><code class="language-java">// ProcessHandle（JDK 9）：进程信息与子进程枚举
+ProcessHandle.current().pid();
+current.children().forEach(ph -&gt; System.out.println(ph.pid()));
+
+// CompletableFuture 增强
+future.orTimeout(5, TimeUnit.SECONDS);                  // JDK 9 超时
+future.completeOnTimeout(&quot;default&quot;, 5, TimeUnit.SECONDS);
+future.exceptionallyCompose(ex -&gt; callFallbackService()); // JDK 12
+
+// Stream 增强
+Stream.of(1, 2, 3, 4, 5).takeWhile(n -&gt; n &lt; 4)  // JDK 9: [1,2,3]
+Stream.ofNullable(getNullableValue())           // JDK 9 空安全
+Stream.of(1, 2, 3).&lt;Integer&gt;mapMulti((num, c) -&gt; { c.accept(num); c.accept(num * 10); })
+// JDK 16: [1,10,2,20,3,30]
+</code></pre>
+<h2 id="十-安全增强">十、安全增强</h2>
+<h3 id="10-1-算法禁用时间线">10.1 算法禁用时间线</h3>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>JDK 8</th>
+<th>JDK 17</th>
+<th>JDK 21</th>
+<th>JDK 25</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>默认 TLS</td>
+<td>1.2</td>
+<td>1.3</td>
+<td>1.3</td>
+<td>1.3</td>
+</tr>
+<tr>
+<td>SHA-1 签名</td>
+<td>允许</td>
+<td>禁用</td>
+<td>禁用</td>
+<td>禁用</td>
+</tr>
+<tr>
+<td>3DES / RC4</td>
+<td>可用</td>
+<td>禁用</td>
+<td>禁用</td>
+<td>禁用</td>
+</tr>
+<tr>
+<td>弱 DH 密钥</td>
+<td>允许</td>
+<td>≥2048 bit</td>
+<td>≥2048 bit</td>
+<td>≥2048 bit</td>
+</tr>
+<tr>
+<td>量子安全算法</td>
+<td>无</td>
+<td>无</td>
+<td>无</td>
+<td>ML-DSA</td>
+</tr>
+</tbody>
+</table>
+<p>迁移坑：JDK 8 升 17 后连接老旧 SSL 服务失败，通常是 TLS 1.0/1.1 与弱算法被默认禁用。临时解是 <code>-Djdk.tls.disabledAlgorithms=""</code>（不推荐），正解是升级对端 TLS。</p>
+<h3 id="10-2-量子抗性">10.2 量子抗性</h3>
+<p>JDK 24 引入 ML-DSA（JEP 497），遵循 NIST FIPS 204 的 Module-Lattice-Based 数字签名算法，为后量子时代储备。JDK 24 预览的 PEM 编解码 API（JEP 470）也在路上。</p>
+<h3 id="10-3-框架适配版本表">10.3 框架适配版本表</h3>
+<table>
+<thead>
+<tr>
+<th>框架/工具</th>
+<th>支持 JDK 17 最低版本</th>
+<th>支持 JDK 21 最低版本</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Spring Framework</td>
+<td>5.3.x（兼容）/ 6.0（原生）</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td>Spring Boot</td>
+<td>2.7.x（兼容）/ 3.0（原生）</td>
+<td>3.2</td>
+</tr>
+<tr>
+<td>Hibernate</td>
+<td>5.6（兼容）/ 6.0（原生）</td>
+<td>6.4</td>
+</tr>
+<tr>
+<td>Lombok</td>
+<td>1.18.22</td>
+<td>1.18.30</td>
+</tr>
+<tr>
+<td>MyBatis</td>
+<td>3.5.9</td>
+<td>3.5.14</td>
+</tr>
+<tr>
+<td>Jackson</td>
+<td>2.13</td>
+<td>2.16</td>
+</tr>
+</tbody>
+</table>
+<h2 id="十一-生产迁移实践">十一、生产迁移实践</h2>
+<h3 id="11-1-JDK-8-17-跨度最大的一次">11.1 JDK 8 → 17：跨度最大的一次</h3>
+<p><strong>第一步：依赖体检</strong>。<code>jdeps</code> 分析内部 API 依赖：</p>
+<pre><code class="language-bash">jdeps --jdk-internals -R --class-path 'libs/*' myapp.jar
+# 输出会点名 sun.misc.Unsafe、com.sun.org.apache.xerces.internal.* 等内部 API 使用
+</code></pre>
+<p><strong>第二步：breaking changes 清单</strong>。常见问题：javax 命名空间变更（Spring Boot 3.x 需 Jakarta EE 9+）、Unsafe 需换 VarHandle、反射内部类抛 <code>InaccessibleObjectException</code>、Nashorn 移除（换 GraalJS）、SecurityManager 废弃。</p>
+<p><strong>第三步：Spring Boot 升级路径</strong>：</p>
+<pre><code class="language-text">Spring Boot 2.x (JDK 8)
+  → Spring Boot 2.7.x (JDK 17 兼容模式)
+  → Spring Boot 3.0+ (JDK 17 原生, javax → jakarta)
+</code></pre>
+<p>javax → jakarta 是全链路最大工作量，用 OpenRewrite 自动化（<code>UpgradeSpringBoot_3_0</code> recipe）可覆盖大部分机械替换，<code>mvn rewrite:run</code> 一键执行。</p>
+<p><strong>第四步：JVM 参数清理</strong>。JDK 8 的一堆参数在 17 中已移除或改名：</p>
+<pre><code class="language-text">-XX:+UseConcMarkSweepGC              → 移除，改 -XX:+UseG1GC
+-XX:+PrintGCDetails                  → -Xlog:gc*
+-XX:PermSize / -XX:MaxPermSize       → 移除（可换 -XX:MaxMetaspaceSize）
+-Xloggc:/var/log/gc.log              → -Xlog:gc*:file=gc.log:time:filecount=5,filesize=20m
+</code></pre>
+<h3 id="11-2-JDK-17-21-平滑但要有策略">11.2 JDK 17 → 21：平滑但要有策略</h3>
+<ul>
+<li><strong>Virtual Threads 引入策略</strong>：不要一刀切。先在非核心链路试点，确认无 pinning（或已升 JDK 24+）再推广。Spring Boot 3.2+ 配置 <code>spring.threads.virtual.enabled=true</code> 一行切换 Tomcat 请求线程。</li>
+<li>Sequenced Collections、switch 模式匹配均为纯增量，无 breaking change，可逐步替换 if-else 链。</li>
+<li>GC 迁移：JDK 17 用 G1 的可直接沿用；试分代 ZGC 时注意堆外内存，容器内存建议设为堆的 1.5-2 倍。</li>
+</ul>
+<h3 id="11-3-JDK-21-25">11.3 JDK 21 → 25</h3>
+<p>最平滑的一跳。收益项：Compact Object Headers（需显式开启）、Scoped Values 转正、AOT Method Profiling、分代 Shenandoah。风险项：留意仍在预览/孵化的语法（String Templates 已被撤回，Structured Concurrency 仍在孵化）。</p>
+<h3 id="11-4-性能基准">11.4 性能基准</h3>
+<p>相同硬件（8 核 16G）实测电商下单接口（100 并发 × 5 分钟）：</p>
+<table>
+<thead>
+<tr>
+<th>JDK 版本</th>
+<th>GC 配置</th>
+<th>QPS</th>
+<th>P50</th>
+<th>P99</th>
+<th>P999</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JDK 8</td>
+<td>CMS 4G</td>
+<td>8,200</td>
+<td>8ms</td>
+<td>45ms</td>
+<td>280ms</td>
+</tr>
+<tr>
+<td>JDK 8</td>
+<td>G1 4G</td>
+<td>8,500</td>
+<td>7ms</td>
+<td>38ms</td>
+<td>150ms</td>
+</tr>
+<tr>
+<td>JDK 17</td>
+<td>G1 4G</td>
+<td>10,100</td>
+<td>6ms</td>
+<td>28ms</td>
+<td>85ms</td>
+</tr>
+<tr>
+<td>JDK 21</td>
+<td>G1 4G</td>
+<td>10,800</td>
+<td>5ms</td>
+<td>25ms</td>
+<td>70ms</td>
+</tr>
+<tr>
+<td>JDK 21</td>
+<td>ZGC 8G</td>
+<td>10,200</td>
+<td>5ms</td>
+<td>12ms</td>
+<td>18ms</td>
+</tr>
+<tr>
+<td>JDK 25</td>
+<td>ZGC+COH 8G</td>
+<td>11,500</td>
+<td>4ms</td>
+<td>10ms</td>
+<td>15ms</td>
+</tr>
+</tbody>
+</table>
+<p>解读：8→17（G1）QPS +23%、P99 -38%；17→21（G1）QPS +7%、长尾显著改善；分代 ZGC 的 P999 比 G1 好 4 倍以上；Compact Object Headers 再贡献约 5% 吞吐。</p>
+<h2 id="十二-选型建议">十二、选型建议</h2>
+<h3 id="12-1-决策矩阵">12.1 决策矩阵</h3>
+<table>
+<thead>
+<tr>
+<th>考虑因素</th>
+<th>留 JDK 8</th>
+<th>升 JDK 17</th>
+<th>升 JDK 21</th>
+<th>升 JDK 25</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>遗留系统无人维护</td>
+<td>可</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Spring Boot 2.x</td>
+<td>可</td>
+<td>推荐（2.7.x）</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr>
+<td>Spring Boot 3.x</td>
+<td>不行</td>
+<td>最低要求</td>
+<td>推荐</td>
+<td>推荐</td>
+</tr>
+<tr>
+<td>需要 Virtual Threads</td>
+<td>不行</td>
+<td>不行</td>
+<td>推荐</td>
+<td>推荐</td>
+</tr>
+<tr>
+<td>高并发 I/O 密集</td>
+<td>-</td>
+<td>-</td>
+<td>强烈推荐</td>
+<td>强烈推荐</td>
+</tr>
+<tr>
+<td>亚毫秒 GC 停顿</td>
+<td>不行</td>
+<td>ZGC 可选</td>
+<td>推荐（分代 ZGC）</td>
+<td>推荐</td>
+</tr>
+<tr>
+<td>容器/K8s 环境</td>
+<td>可用</td>
+<td>推荐</td>
+<td>推荐</td>
+<td>强烈推荐（COH）</td>
+</tr>
+<tr>
+<td>启动时间敏感</td>
+<td>-</td>
+<td>CDS</td>
+<td>CDS</td>
+<td>AOT Cache</td>
+</tr>
+<tr>
+<td>安全合规要求高</td>
+<td>有风险</td>
+<td>可</td>
+<td>推荐</td>
+<td>推荐（量子安全）</td>
+</tr>
+<tr>
+<td>新项目</td>
+<td>-</td>
+<td>-</td>
+<td>-</td>
+<td>直接上</td>
+</tr>
+</tbody>
+</table>
+<h3 id="12-2-分场景建议">12.2 分场景建议</h3>
+<ol>
+<li><strong>还在 JDK 8</strong>：尽快动。JDK 8 的 Oracle 公共更新 2019 年已停，安全补丁只能靠第三方发行版。建议直接瞄准 21 或 25——因为 17→21 的增量成本很低，一次到位反而省一趟迁移。</li>
+<li><strong>在 JDK 17</strong>：I/O 密集应用值得为 Virtual Threads 上 21；25 作为最新 LTS 是更好的落点。</li>
+<li><strong>新项目</strong>：直接 JDK 25。</li>
+<li><strong>Spring Boot 速查</strong>：3.0-3.1 最低 17、支持到 20；3.2-3.3 支持到 22；3.4+ 支持到 25。</li>
+</ol>
+<h3 id="12-3-总结">12.3 总结</h3>
+<p>回望这十一年：JDK 8 让 Java 学会了函数式，JDK 17 把语法打磨成"现代 Java"的完整拼图，JDK 21 用虚拟线程重新定义了并发，JDK 25 则转向内存与启动的底层收割（Compact Headers、AOT）。每一次 LTS 都对应一个明确的升级理由：<strong>要语法现代化看 17，要并发革命看 21，要内存与启动收益看 25</strong>。版本升级不再是信仰问题，而是一笔可以用基准数据算清楚的账。</p>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a href="https://www.oracle.com/java/technologies/javase/8-whats-new.html">JDK 8 Features - Oracle</a></li>
+<li><a href="https://www.oracle.com/java/technologies/javase/17-relnote-issues.html">JDK 17 Release Notes - Oracle</a></li>
+<li><a href="https://openjdk.org/projects/jdk/21/">JDK 21 JEP Index - OpenJDK</a></li>
+<li><a href="https://openjdk.org/projects/jdk/25/">JDK 25 JEP Index - OpenJDK</a></li>
+<li><a href="https://openjdk.org/jeps/444">JEP 444: Virtual Threads</a></li>
+<li><a href="https://openjdk.org/jeps/439">JEP 439: Generational ZGC</a></li>
+<li><a href="https://openjdk.org/jeps/519">JEP 519: Compact Object Headers</a></li>
+<li><a href="https://openjdk.org/jeps/506">JEP 506: Scoped Values</a></li>
+<li><a href="https://openjdk.org/jeps/513">JEP 513: Flexible Constructor Bodies</a></li>
+<li><a href="https://openjdk.org/jeps/512">JEP 512: Compact Source Files and Instance Main Methods</a></li>
+<li><a href="https://openjdk.org/jeps/511">JEP 511: Module Import Declarations</a></li>
+<li><a href="https://openjdk.org/jeps/521">JEP 521: Generational Shenandoah</a></li>
+<li><a href="https://openjdk.org/jeps/515">JEP 515: AOT Method Profiling</a></li>
+<li><a href="https://openjdk.org/jeps/502">JEP 502: Stable Values (Preview)</a></li>
+<li><a href="https://openjdk.org/jeps/485">JEP 485: Stream Gatherers</a></li>
+<li><a href="https://openjdk.org/jeps/491">JEP 491: Synchronize Virtual Threads without Pinning</a></li>
+<li><a href="https://openjdk.org/jeps/483">JEP 483: Ahead-of-Time Class Loading &amp; Linking</a></li>
+<li><a href="https://openjdk.org/jeps/497">JEP 497: Quantum-Resistant ML-DSA</a></li>
+<li><a href="https://openjdk.org/jeps/254">JEP 254: Compact Strings</a></li>
+<li><a href="https://openjdk.org/jeps/310">JEP 310: Application Class-Data Sharing</a></li>
+<li><a href="https://openjdk.org/jeps/350">JEP 350: Dynamic CDS Archives</a></li>
+<li><a href="https://openjdk.org/projects/loom/">Project Loom</a> / <a href="https://openjdk.org/projects/panama/">Project Panama</a> / <a href="https://openjdk.org/projects/leyden/">Project Leyden</a> / <a href="https://openjdk.org/projects/lilliput/">Project Lilliput</a></li>
+<li><a href="https://docs.spring.io/spring-boot/system-requirements.html">Spring Boot System Requirements</a></li>
+<li><a href="https://docs.openrewrite.org/recipes/java/spring/boot3/upgradespringboot_3_0">OpenRewrite Spring Boot 3 Migration</a></li>
+</ul>
+  </main>
+</div>
+
+<button id="top-btn" title="回到顶部">↑</button>
+
+<footer>
+  本文为原创重述，参考来源：<a href="https://juejin.cn/post/7625237255017299987" target="_blank" rel="noopener">juejin.cn/post/7625237255017299987</a>
+</footer>
+
+<script>
+hljs.highlightAll();
+// 阅读进度条
+const bar = document.getElementById('progress');
+addEventListener('scroll', () => {
+  const h = document.documentElement;
+  bar.style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + '%';
+});
+// 回到顶部按钮
+const topBtn = document.getElementById('top-btn');
+addEventListener('scroll', () => {
+  topBtn.style.display = scrollY > 600 ? 'flex' : 'none';
+});
+topBtn.onclick = () => scrollTo({ top: 0, behavior: 'smooth' });
+</script>
+</body>
+</html>
